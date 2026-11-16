@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  avatar    String?
+  createdAt DateTime @default(now())
+  listings  Listing[]
+  bookings  Booking[]
+  reviews   Review[]
+  wishlist  Wishlist[]
+}
+
+
+
+model Listing {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  price       Float
+  country     String
+  location    String
+  image       String
+  category    String
+  amenities   String?
+  latitude    Float?
+  longitude   Float?
+  ownerId     Int
+  owner       User      @relation(fields: [ownerId], references: [id])
+  createdAt   DateTime  @default(now())
+  bookings    Booking[]
+  reviews     Review[]
+  wishlists   Wishlist[]
+}
+
+model Booking {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  listingId     Int
+  listing       Listing  @relation(fields: [listingId], references: [id])
+  checkIn       DateTime
+  checkOut      DateTime
+  guests        Int
+  totalPrice    Float
+  paymentStatus String   @default("pending")
+  bookingStatus String   @default("confirmed")
+  createdAt     DateTime @default(now())
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  listingId Int
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  comment   String
+  rating    Int
+  createdAt DateTime @default(now())
+}
+
+model Wishlist {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  listingId Int
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  @@unique([userId, listingId])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  message    String
+  createdAt  DateTime @default(now())
+}
